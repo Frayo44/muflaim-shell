@@ -11,7 +11,7 @@
 #include <strsafe.h>
 #include <memory>
 
-// Getting a command, parsing it and executing it
+// Getting a command, parsing it and executing itdd
 
 using namespace std;
 
