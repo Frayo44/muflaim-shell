@@ -1,13 +1,6 @@
-// shell.cpp : Defines the entry point for the console application.
-//
-
 #include "stdafx.h"
-
-
-// Getting a command, parsing it and executing it
-
-using namespace std;
-
+#include "DirCommand.h"
+#include "Split.h"
 
 class FileInfo
 {
@@ -43,24 +36,7 @@ public:
 
 };
 
-template<typename T>
-vector<T>
-split(const T & str, const T & delimiters) {
-	vector<T> v;
-	T::size_type start = 0;
-	auto pos = str.find_first_of(delimiters, start);
-	while (pos != T::npos) {
-		if (pos != start) // ignore empty tokens
-			v.emplace_back(str, start, pos - start);
-		start = pos + 1;
-		pos = str.find_first_of(delimiters, start);
-	}
-	if (start < str.length()) // ignore trailing delimiter
-		v.emplace_back(str, start, str.length() - start); // add what's left of the string
-	return v;
-}
-
-shared_ptr<vector<FileInfo>> getFilesUnderDirectory(const wstring & path)
+static shared_ptr<vector<FileInfo>> getFilesUnderDirectory(const wstring & path)
 {
 	WIN32_FIND_DATA ffd;
 	LARGE_INTEGER filesize;
@@ -113,8 +89,8 @@ shared_ptr<vector<FileInfo>> getFilesUnderDirectory(const wstring & path)
 
 			//_tprintf(TEXT("  %s   %ld bytes\n"), ffd.cFileName, filesize.QuadPart);
 		}
-		
-		
+
+
 	} while (FindNextFile(hFind, &ffd) != 0);
 
 	dwError = GetLastError();
@@ -127,55 +103,24 @@ shared_ptr<vector<FileInfo>> getFilesUnderDirectory(const wstring & path)
 	return results;
 }
 
-int _tmain(int argc, _TCHAR* argv[])
-{
-	wstring str;
-	getline(wcin, str);
-	wcout << str;
-	vector<wstring> result = split(str, wstring(_T(" ")));
+void DirCommand::execute(wistream &in, wostream &out){
+	vector<wstring> result = split(command, wstring(_T(" ")));
 	if (result.size() < 2)
 	{
-		wcout << "Error";
-		return 1;
+		throw "Too few arguments";
 	}
-
-	wstring command = result[0];
-
-	if (command == _T("dir"))
+	wstring path = result[1];
+	auto files = getFilesUnderDirectory(path);
+	for (auto it = files->begin(); it != files->end(); ++it)
 	{
-		wstring path = result[1];
-		auto files = getFilesUnderDirectory(path);
-		for (auto it = files->begin(); it != files->end(); ++it)
+		if (it->is_dir())
 		{
-			if (it->is_dir())
-			{
-				wcout << "DIR "<< it->get_file_name() << endl;
-			}
-			else
-			{
-				wcout << it->get_size().QuadPart << "  " 
-					<< it->get_file_name() << endl;
-			}
-	
-			
+			out << "DIR " << it->get_file_name() << endl;
+		}
+		else
+		{
+			out << it->get_size().QuadPart << "  "
+				<< it->get_file_name() << endl;
 		}
 	}
-	else if (command == _T("mkdir"))
-	{
-		wstring path = result[1];
-		const TCHAR *newPath = path.c_str();
-		if (_wmkdir(newPath) == 0)
-		{
-			cout << "dir created";
-		}
-		else {
-			char buffer[80];
-			if (EEXIST != errno){
-				cout << strerror_s(buffer, sizeof(buffer)) << endl;
-			}
-		}
-		
-	}
-
-	return 0;
 }

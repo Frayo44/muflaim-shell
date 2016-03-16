@@ -79,10 +79,18 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Command.h" />
+    <ClInclude Include="CommandFactory.h" />
+    <ClInclude Include="DirCommand.h" />
+    <ClInclude Include="MkDirCommand.h" />
+    <ClInclude Include="Split.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CommandFactory.cpp" />
+    <ClCompile Include="DirCommand.cpp" />
+    <ClCompile Include="MkDirCommand.cpp" />
     <ClCompile Include="shell.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
